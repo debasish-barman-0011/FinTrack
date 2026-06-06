@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack - Smart Financial Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 30px;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-outline:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 150px 0 80px;
+            margin-top: 60px;
+        }
+        
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .features-list li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        /* Demo Section */
+        .demo-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+        
+        .demo-section h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .demo-card h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .summary-card h4 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card .amount {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+        }
+        
+        .features h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        .footer .container p a {
+            color: #f0f0f0;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">FinTrack</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#demo">Demo</a>
+                <a href="/login" class="btn btn-outline">Login</a>
+            </div>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <div>
+                <h1>Smart Financial Management for Everyone</h1>
+                <p>Track income, manage expenses, build savings, and get insights - all in one place. Far more intuitive than spreadsheets!</p>
+                <ul class="features-list">
+                    <li>Real-time balance computation</li>
+                    <li>Visual reports & analytics</li>
+                    <li>Borrow/lend tracking</li>
+                    <li>PDF & Excel exports</li>
+                </ul>
+                <a href="/login" class="btn btn-primary">Get Started →</a>
+            </div>
+            <div>
+                <img src="https://res.cloudinary.com/dqwwisqyh/image/upload/v1780738174/bar-chart-histogram-1_z5z1q0.jpg" alt="Dashboard Preview" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            </div>
+        </div>
+    </section>
+    
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2>Live Demo Preview</h2>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h4>Total Income</h4>
+                    <div class="amount">₹45,000</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Expenses</h4>
+                    <div class="amount">₹28,500</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Net Savings</h4>
+                    <div class="amount">₹16,500</div>
+                </div>
+            </div>
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <h3>Expense Distribution</h3>
+                    <canvas id="demoPieChart" width="400" height="300"></canvas>
+                </div>
+                <div class="demo-card">
+                    <h3>Monthly Trend</h3>
+                    <canvas id="demoBarChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Powerful Features for Complete Control</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <h3>Income Tracking</h3>
+                    <p>Track multiple income sources with detailed categorization</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💳</div>
+                    <h3>Expense Management</h3>
+                    <p>Categorize every expense with mandatory descriptions</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏦</div>
+                    <h3>Savings & Assets</h3>
+                    <p>Track investments, bank deposits, and money lent to others</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📈</div>
+                    <h3>Visual Reports</h3>
+                    <p>Beautiful charts and detailed financial reports</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📄</div>
+                    <h3>Export Options</h3>
+                    <p>Download reports as PDF or Excel with one click</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Private</h3>
+                    <p>Your financial data stays protected with encryption</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 FinTrack - The Smart Financial Management for Everyone</p>
+            <p>Built by <a href="https://debasishbarman.in" target="_blank">Debasish Barman</a> for better financial audit.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Dummy data for demo charts
+        const pieCtx = document.getElementById('demoPieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Grocery', 'Utilities', 'Transport', 'Entertainment', 'Healthcare'],
+                datasets: [{
+                    data: [8500, 4200, 3800, 2500, 1800],
+                    backgroundColor: ['#27ae60', '#e74c3c', '#f39c12', '#3498db', '#9b59b6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+        
+        const barCtx = document.getElementById('demoBarChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Income',
+                    data: [42000, 38000, 45000, 48000, 51000, 45000],
+                    backgroundColor: '#27ae60'
+                }, {
+                    label: 'Expenses',
+                    data: [28000, 26000, 31000, 29000, 34000, 28500],
+                    backgroundColor: '#e74c3c'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount (₹)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

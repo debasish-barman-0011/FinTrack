@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Savings Record{% endblock %}
+
+{% block page_title %}Add New Savings/Asset{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" id="savingsForm">
+        <div class="form-group">
+            <label>Date *</label>
+            <input type="date" name="date" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Category *</label>
+            <select name="category" id="category" class="form-control" required>
+                <option value="">Select Category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group" id="subCategoryGroup" style="display: none;">
+            <label>Investment Type</label>
+            <select name="sub_category" class="form-control">
+                <option value="">Select Investment Type</option>
+                {% for subcat in investment_subcats %}
+                    <option value="{{ subcat }}">{{ subcat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Remarks *</label>
+            <textarea name="remarks" class="form-control" rows="3" required placeholder="E.g., Purpose, due date, location, etc."></textarea>
+            <small style="color: #e74c3c;">This field is mandatory</small>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary">Save Record</button>
+            <a href="/admin/savings/" class="btn" style="background: #95a5a6; color: white;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Set today's date as default
+document.querySelector('input[name="date"]').value = new Date().toISOString().split('T')[0];
+
+// Show/hide subcategory based on category selection
+const categorySelect = document.getElementById('category');
+const subCategoryGroup = document.getElementById('subCategoryGroup');
+
+categorySelect.addEventListener('change', function() {
+    if (this.value === 'Investment') {
+        subCategoryGroup.style.display = 'block';
+    } else {
+        subCategoryGroup.style.display = 'none';
+        document.querySelector('select[name="sub_category"]').value = '';
+    }
+});
+</script>
+{% endblock %}

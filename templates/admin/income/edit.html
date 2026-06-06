@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Edit Income{% endblock %}
+
+{% block page_title %}Edit Income Record{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label>Date *</label>
+            <input type="date" name="date" class="form-control" required value="{{ income.date.strftime('%Y-%m-%d') }}">
+        </div>
+        
+        <div class="form-group">
+            <label>Source *</label>
+            <select name="source" class="form-control" required>
+                {% for source in sources %}
+                    <option value="{{ source }}" {% if income.source == source %}selected{% endif %}>{{ source }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" value="{{ income.amount }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Remarks</label>
+            <textarea name="remarks" class="form-control" rows="3" placeholder="Optional notes...">{{ income.remarks or '' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Audit Information</label>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;">
+                <div>Created: {{ income.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                <div>Last Updated: {{ income.updated_at.strftime('%Y-%m-%d %H:%M:%S') if income.updated_at else 'Never' }}</div>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary">Update Income</button>
+            <a href="/admin/income/" class="btn" style="background: #95a5a6; color: white;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

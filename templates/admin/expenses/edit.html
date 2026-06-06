@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Edit Expense{% endblock %}
+
+{% block page_title %}Edit Expense Record{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label>Date *</label>
+            <input type="date" name="date" class="form-control" required value="{{ expense.date.strftime('%Y-%m-%d') }}">
+        </div>
+        
+        <div class="form-group">
+            <label>Category *</label>
+            <select name="category" class="form-control" required>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if expense.category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Description *</label>
+            <textarea name="description" class="form-control" rows="3" required placeholder="Describe what was purchased...">{{ expense.description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" value="{{ expense.amount }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Audit Information</label>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;">
+                <div>Created: {{ expense.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                <div>Last Updated: {{ expense.updated_at.strftime('%Y-%m-%d %H:%M:%S') if expense.updated_at else 'Never' }}</div>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary">Update Expense</button>
+            <a href="/admin/expenses/" class="btn" style="background: #95a5a6; color: white;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

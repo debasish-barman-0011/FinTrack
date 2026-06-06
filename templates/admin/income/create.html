@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Income{% endblock %}
+
+{% block page_title %}Add New Income{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label>Date *</label>
+            <input type="date" name="date" class="form-control" required value="{{ today if today else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label>Source *</label>
+            <select name="source" class="form-control" required>
+                <option value="">Select Source</option>
+                {% for source in sources %}
+                    <option value="{{ source }}">{{ source }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Remarks</label>
+            <textarea name="remarks" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary">Save Income</button>
+            <a href="/admin/income/" class="btn" style="background: #95a5a6; color: white;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Set today's date as default
+document.querySelector('input[name="date"]').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

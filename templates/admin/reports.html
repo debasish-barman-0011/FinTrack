@@ -1,0 +1,295 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block page_title %}Financial Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Report Filters</div>
+    <form id="reportForm">
+        <div class="form-group">
+            <label>Report Type</label>
+            <select id="reportType" name="type" class="form-control" onchange="toggleDateFields()">
+                <option value="month">Monthly Report</option>
+                <option value="custom">Custom Date Range</option>
+            </select>
+        </div>
+        
+        <div id="monthField">
+            <div class="form-group">
+                <label>Select Month</label>
+                <input type="month" id="month" class="form-control">
+            </div>
+        </div>
+        
+        <div id="dateRangeField" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="startDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="endDate" class="form-control">
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" onclick="generateReport()" class="btn btn-primary">Generate Report</button>
+            <button type="button" onclick="downloadPDF()" class="btn" style="background: #e74c3c; color: white;">📄 Download PDF</button>
+            <button type="button" onclick="downloadExcel()" class="btn" style="background: #27ae60; color: white;">📊 Download Excel</button>
+        </div>
+    </form>
+</div>
+
+<div id="reportResults" style="display: none;">
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="summary-card green">
+            <h4>Total Income</h4>
+            <div class="amount" id="totalIncome">₹0</div>
+        </div>
+        <div class="summary-card red">
+            <h4>Total Expenses</h4>
+            <div class="amount" id="totalExpenses">₹0</div>
+        </div>
+        <div class="summary-card">
+            <h4>Net Surplus</h4>
+            <div class="amount" id="netSurplus">₹0</div>
+        </div>
+        <div class="summary-card blue">
+            <h4>Net Available Balance</h4>
+            <div class="amount" id="netAvailable">₹0</div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div class="card">
+            <div class="card-header">Income by Source</div>
+            <canvas id="incomeReportChart" height="300"></canvas>
+        </div>
+        <div class="card">
+            <div class="card-header">Expenses by Category</div>
+            <canvas id="expenseReportChart" height="300"></canvas>
+        </div>
+    </div>
+    
+    <!-- Detailed Tables -->
+    <div class="card">
+        <div class="card-header">Income Details</div>
+        <div style="overflow-x: auto;">
+            <table class="data-table" id="incomeTable">
+                <thead>
+                    <tr><th>Date</th><th>Source</th><th>Amount</th><th>Remarks</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">Expense Details</div>
+        <div style="overflow-x: auto;">
+            <table class="data-table" id="expenseTable">
+                <thead>
+                    <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">Savings Details</div>
+        <div style="overflow-x: auto;">
+            <table class="data-table" id="savingsTable">
+                <thead>
+                    <tr><th>Date</th><th>Category</th><th>Sub-Category</th><th>Amount</th><th>Remarks</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentReportData = null;
+
+function toggleDateFields() {
+    const type = document.getElementById('reportType').value;
+    if (type === 'month') {
+        document.getElementById('monthField').style.display = 'block';
+        document.getElementById('dateRangeField').style.display = 'none';
+    } else {
+        document.getElementById('monthField').style.display = 'none';
+        document.getElementById('dateRangeField').style.display = 'block';
+    }
+}
+
+async function generateReport() {
+    const type = document.getElementById('reportType').value;
+    let url = '/admin/reports/data?type=' + type;
+    
+    if (type === 'month') {
+        const month = document.getElementById('month').value;
+        if (!month) {
+            alert('Please select a month');
+            return;
+        }
+        url += '&month=' + month;
+    } else {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates');
+            return;
+        }
+        url += '&start_date=' + startDate + '&end_date=' + endDate;
+    }
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        currentReportData = data;
+        displayReport(data);
+    } catch (error) {
+        console.error('Error generating report:', error);
+        alert('Error generating report');
+    }
+}
+
+function displayReport(data) {
+    document.getElementById('reportResults').style.display = 'block';
+    
+    // Update summary cards
+    document.getElementById('totalIncome').innerText = '₹' + data.total_income.toLocaleString();
+    document.getElementById('totalExpenses').innerText = '₹' + data.total_expenses.toLocaleString();
+    document.getElementById('netSurplus').innerText = '₹' + data.net_surplus.toLocaleString();
+    document.getElementById('netAvailable').innerText = '₹' + data.net_available.toLocaleString();
+    
+    // Income chart
+    const incomeCtx = document.getElementById('incomeReportChart').getContext('2d');
+    new Chart(incomeCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(data.income_by_source),
+            datasets: [{
+                data: Object.values(data.income_by_source),
+                backgroundColor: ['#27ae60', '#2ecc71', '#1abc9c', '#16a085', '#3498db']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+    
+    // Expense chart
+    const expenseCtx = document.getElementById('expenseReportChart').getContext('2d');
+    new Chart(expenseCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(data.expense_by_category),
+            datasets: [{
+                data: Object.values(data.expense_by_category),
+                backgroundColor: ['#e74c3c', '#c0392b', '#f39c12', '#e67e22', '#d35400']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+    
+    // Populate tables
+    const incomeTable = document.querySelector('#incomeTable tbody');
+    incomeTable.innerHTML = data.incomes.map(inc => `
+        <tr>
+            <td>${inc.date}</td>
+            <td><span class="badge badge-income">${inc.source}</span></td>
+            <td style="color: #27ae60;">₹${inc.amount.toLocaleString()}</td>
+            <td>${inc.remarks || '-'}</td>
+        </tr>
+    `).join('');
+    
+    const expenseTable = document.querySelector('#expenseTable tbody');
+    expenseTable.innerHTML = data.expenses.map(exp => `
+        <tr>
+            <td>${exp.date}</td>
+            <td><span class="badge badge-expense">${exp.category}</span></td>
+            <td>${exp.description}</td>
+            <td style="color: #e74c3c;">₹${exp.amount.toLocaleString()}</td>
+        </tr>
+    `).join('');
+    
+    const savingsTable = document.querySelector('#savingsTable tbody');
+    savingsTable.innerHTML = data.savings.map(sav => `
+        <tr>
+            <td>${sav.date}</td>
+            <td><span class="badge badge-saving">${sav.category}</span></td>
+            <td>${sav.sub_category || '-'}</td>
+            <td style="color: #3498db;">₹${sav.amount.toLocaleString()}</td>
+            <td>${sav.remarks}</td>
+        </tr>
+    `).join('');
+}
+
+function downloadPDF() {
+    if (!currentReportData) {
+        alert('Please generate a report first');
+        return;
+    }
+    
+    const type = document.getElementById('reportType').value;
+    let url = '/admin/reports/download/pdf?type=' + type;
+    
+    if (type === 'month') {
+        const month = document.getElementById('month').value;
+        if (month) url += '&month=' + month;
+    } else {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (startDate && endDate) {
+            url += '&start_date=' + startDate + '&end_date=' + endDate;
+        }
+    }
+    
+    window.open(url, '_blank');
+}
+
+function downloadExcel() {
+    if (!currentReportData) {
+        alert('Please generate a report first');
+        return;
+    }
+    
+    const type = document.getElementById('reportType').value;
+    let url = '/admin/reports/download/excel?type=' + type;
+    
+    if (type === 'month') {
+        const month = document.getElementById('month').value;
+        if (month) url += '&month=' + month;
+    } else {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (startDate && endDate) {
+            url += '&start_date=' + startDate + '&end_date=' + endDate;
+        }
+    }
+    
+    window.open(url, '_blank');
+}
+
+// Set default values
+document.getElementById('month').value = new Date().toISOString().slice(0, 7);
+const today = new Date().toISOString().split('T')[0];
+const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+document.getElementById('startDate').value = firstDay;
+document.getElementById('endDate').value = today;
+</script>
+{% endblock %}

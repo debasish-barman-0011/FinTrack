@@ -1,0 +1,47 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Expense{% endblock %}
+
+{% block page_title %}Add New Expense{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST">
+        <div class="form-group">
+            <label>Date *</label>
+            <input type="date" name="date" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Category *</label>
+            <select name="category" class="form-control" required>
+                <option value="">Select Category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Description *</label>
+            <textarea name="description" class="form-control" rows="3" required placeholder="Describe what was purchased..."></textarea>
+            <small style="color: #e74c3c;">This field is mandatory for better tracking</small>
+        </div>
+        
+        <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary">Save Expense</button>
+            <a href="/admin/expenses/" class="btn" style="background: #95a5a6; color: white;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Set today's date as default
+document.querySelector('input[name="date"]').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

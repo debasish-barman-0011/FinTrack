@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Global Search{% endblock %}
+
+{% block page_title %}Global Search{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="GET" action="/admin/search/">
+        <div class="form-group">
+            <label>Search across all records</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" name="q" class="form-control" placeholder="Search by amount, category, description, remarks..." value="{{ query }}" style="flex: 1;">
+                <button type="submit" class="btn btn-primary">🔍 Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if query %}
+<div class="card">
+    <div class="card-header">Search Results for "{{ query }}"</div>
+    <div style="margin-top: 20px;">
+        {% if results %}
+            {% for result in results %}
+            <div style="background: white; border: 1px solid #ecf0f1; border-radius: 5px; margin-bottom: 10px; padding: 15px; cursor: pointer;" onclick="editRecord('{{ result.type }}', {{ result.id }})">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        {% if result.type == 'income' %}
+                            <span class="badge badge-income" style="font-size: 14px;">💰 INCOME</span>
+                        {% elif result.type == 'expense' %}
+                            <span class="badge badge-expense" style="font-size: 14px;">🛒 EXPENSE</span>
+                        {% else %}
+                            <span class="badge badge-saving" style="font-size: 14px;">🏦 SAVINGS</span>
+                        {% endif %}
+                        <strong style="margin-left: 10px;">{{ result.title }}</strong>
+                    </div>
+                    <div style="color: {% if result.type == 'income' %}#27ae60{% elif result.type == 'expense' %}#e74c3c{% else %}#3498db{% endif %}; font-weight: bold; font-size: 18px;">
+                        ₹{{ "%.2f"|format(result.amount) }}
+                    </div>
+                </div>
+                <div style="margin-top: 10px; color: #7f8c8d; font-size: 13px;">
+                    <div>📅 {{ result.date }}</div>
+                    <div>📝 {{ result.description }}</div>
+                    {% if result.recovered is defined %}
+                        <div>✅ Recovered: {{ 'Yes' if result.recovered else 'No' }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                <p>No results found for "{{ query }}"</p>
+                <p style="font-size: 14px;">Try searching by different keywords or check your spelling</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div style="text-align: center; padding: 60px; color: #7f8c8d;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+        <h3>Search across all your financial records</h3>
+        <p style="margin-top: 10px;">Search by amount, category, description, or remarks</p>
+        <p style="font-size: 14px; margin-top: 20px;">Examples: "Salary", "5000", "Grocery", "Loaned to..."</p>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function editRecord(type, id) {
+    let url = '';
+    if (type === 'income') {
+        url = `/admin/income/edit/${id}`;
+    } else if (type === 'expense') {
+        url = `/admin/expenses/edit/${id}`;
+    } else {
+        url = `/admin/savings/edit/${id}`;
+    }
+    window.location.href = url;
+}
+</script>
+{% endblock %}
