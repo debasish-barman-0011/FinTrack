@@ -21,8 +21,8 @@ def seed_database():
         db.create_all()
         
         # Create admin user
-        admin = User(username='crazy')
-        admin.set_password('crazy')
+        admin = User(username='debasishbarman')
+        admin.set_password('Debasish@69')
         admin.last_password_change = datetime.now()
         db.session.add(admin)
         db.session.flush()
@@ -91,8 +91,6 @@ def seed_database():
         
         print("Database seeded successfully!")
         print("\nDefault Admin Credentials:")
-        print("Username: crazy")
-        print("Password: crazy")
         print("\nSample data has been added for testing.")
 
 if __name__ == '__main__':
