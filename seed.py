@@ -21,8 +21,8 @@ def seed_database():
         db.create_all()
         
         # Create admin user
-        admin = User(username='debasishbarman')
-        admin.set_password('Debasish@69')
+        admin = User(username='')
+        admin.set_password('')
         admin.last_password_change = datetime.now()
         db.session.add(admin)
         db.session.flush()
